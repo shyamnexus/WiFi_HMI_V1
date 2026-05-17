@@ -1,0 +1,13 @@
+{
+  "idf.espIdfPathWin": "C:\\esp\\v5.5.2\\esp-idf",
+  "idf.toolsPathWin": "C:\\Espressif\\tools",
+  "idf.pythonBinPathWin": "C:\\Espressif\\tools\\python\\v5.5.2\\venv\\Scripts\\python.exe",
+  "idf.monitorBaudRate": 115200,
+  "terminal.integrated.env.windows": {
+    "IDF_PATH": "C:\\esp\\v5.5.2\\esp-idf",
+    "IDF_TOOLS_PATH": "C:\\Espressif\\tools"
+  },
+  "idf.currentSetup": "C:\\esp\\v5.5.2\\esp-idf",
+  "idf.flashType": "UART",
+  "idf.portWin": "COM4"
+}

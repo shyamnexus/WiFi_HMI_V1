@@ -1,0 +1,16 @@
+idf_component_register(
+    SRCS
+        "main.c"
+        "cli_parser.c"
+        "hmi_screen.c"
+        "wireless_data.c"
+    INCLUDE_DIRS
+        "."
+    REQUIRES
+        console
+        nvs_flash
+        esp_timer
+        bsp
+        esp_lvgl_port
+        lvgl
+)

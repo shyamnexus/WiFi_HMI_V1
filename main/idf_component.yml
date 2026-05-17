@@ -1,0 +1,15 @@
+## IDF Component Manager Manifest File
+dependencies:
+  idf: ">=5.5.0"
+
+  ## LVGL graphics library (v9 required for esp_lvgl_port v2.7+)
+  lvgl/lvgl:
+    version: ">=9.1.0,<10.0.0"
+
+  ## Espressif LVGL port — handles display/touch registration and task
+  espressif/esp_lvgl_port:
+    version: ">=2.7.0"
+
+  ## GT911 capacitive touch controller driver
+  espressif/esp_lcd_touch_gt911:
+    version: ">=1.2.0"
