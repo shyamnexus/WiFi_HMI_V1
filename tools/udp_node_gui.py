@@ -9,6 +9,7 @@ from tkinter import ttk
 
 
 DEVICE_COUNT = 32
+FIELD_MAX_LEN = 16
 
 
 class UdpNodeGui(tk.Tk):
@@ -26,22 +27,23 @@ class UdpNodeGui(tk.Tk):
         self.endpoint_port = tk.StringVar(value="7001")
         self.interval = tk.StringVar(value="1.0")
         self.count = tk.StringVar(value="0")
-        self.auto_increment = tk.BooleanVar(value=True)
         self.row_vars: list[dict[str, tk.Variable]] = []
 
         for index in range(DEVICE_COUNT):
             node_number = index + 1
             node_id = f"NODE-{node_number:02d}"
-            rssi = str(-55 - (index % 18))
-            battery = f"{4.20 - (index * 0.02):.2f}"
-            samples = str(1000 + (index * 100))
+            data1 = f"D1-{node_number:02d}"
+            data2 = f"D2-{node_number:02d}"
+            data3 = f"D3-{node_number:02d}"
+            data4 = f"D4-{node_number:02d}"
             self.row_vars.append(
                 {
                     "enabled": tk.BooleanVar(value=True),
                     "node_id": tk.StringVar(value=node_id),
-                    "rssi": tk.StringVar(value=rssi),
-                    "battery": tk.StringVar(value=battery),
-                    "samples": tk.StringVar(value=samples),
+                    "data1": tk.StringVar(value=data1),
+                    "data2": tk.StringVar(value=data2),
+                    "data3": tk.StringVar(value=data3),
+                    "data4": tk.StringVar(value=data4),
                     "preview": tk.StringVar(),
                 }
             )
@@ -76,12 +78,13 @@ class UdpNodeGui(tk.Tk):
         count_entry = ttk.Entry(top, textvariable=self.count)
         count_entry.grid(row=1, column=3, sticky="ew", pady=4)
 
-        auto_increment_check = ttk.Checkbutton(
-            top,
-            text="Increment samples after each send",
-            variable=self.auto_increment,
+        ttk.Label(top, text=f"Payload format: device,data1,data2,data3,data4 (max {FIELD_MAX_LEN} chars each)").grid(
+            row=2,
+            column=0,
+            columnspan=4,
+            sticky="w",
+            pady=(6, 4),
         )
-        auto_increment_check.grid(row=2, column=0, columnspan=4, sticky="w", pady=(6, 4))
 
         center = ttk.Frame(self, padding=(12, 0, 12, 12))
         center.grid(row=1, column=0, sticky="nsew")
@@ -132,9 +135,9 @@ class UdpNodeGui(tk.Tk):
         )
         canvas.bind_all("<MouseWheel>", lambda event: canvas.yview_scroll(int(-event.delta / 120), "units"))
 
-        rows_container.columnconfigure(5, weight=1)
+        rows_container.columnconfigure(6, weight=1)
 
-        headers = ["Use", "Node ID", "RSSI", "Battery", "Samples", "Payload Preview", "Action"]
+        headers = ["Use", "Device", "Data1", "Data2", "Data3", "Data4", "Payload Preview", "Action"]
         for column, text in enumerate(headers):
             ttk.Label(rows_container, text=text).grid(row=0, column=column, sticky="w", padx=4, pady=(0, 6))
 
@@ -142,18 +145,19 @@ class UdpNodeGui(tk.Tk):
         for index, row in enumerate(self.row_vars, start=1):
             ttk.Checkbutton(rows_container, variable=row["enabled"]).grid(row=index, column=0, sticky="w", padx=4, pady=4)
             ttk.Entry(rows_container, textvariable=row["node_id"], width=14).grid(row=index, column=1, sticky="ew", padx=4, pady=4)
-            ttk.Entry(rows_container, textvariable=row["rssi"], width=10).grid(row=index, column=2, sticky="ew", padx=4, pady=4)
-            ttk.Entry(rows_container, textvariable=row["battery"], width=10).grid(row=index, column=3, sticky="ew", padx=4, pady=4)
-            ttk.Entry(rows_container, textvariable=row["samples"], width=12).grid(row=index, column=4, sticky="ew", padx=4, pady=4)
+            ttk.Entry(rows_container, textvariable=row["data1"], width=12).grid(row=index, column=2, sticky="ew", padx=4, pady=4)
+            ttk.Entry(rows_container, textvariable=row["data2"], width=12).grid(row=index, column=3, sticky="ew", padx=4, pady=4)
+            ttk.Entry(rows_container, textvariable=row["data3"], width=12).grid(row=index, column=4, sticky="ew", padx=4, pady=4)
+            ttk.Entry(rows_container, textvariable=row["data4"], width=12).grid(row=index, column=5, sticky="ew", padx=4, pady=4)
             ttk.Label(rows_container, textvariable=row["preview"], font=("Consolas", 10), anchor="w").grid(
                 row=index,
-                column=5,
+                column=6,
                 sticky="ew",
                 padx=4,
                 pady=4,
             )
             send_button = ttk.Button(rows_container, text="Send Row", command=lambda i=index - 1: self.send_row(i))
-            send_button.grid(row=index, column=6, sticky="ew", padx=4, pady=4)
+            send_button.grid(row=index, column=7, sticky="ew", padx=4, pady=4)
             self.row_send_buttons.append(send_button)
 
         log_frame = ttk.LabelFrame(center, text="Activity Log", padding=8)
@@ -169,7 +173,7 @@ class UdpNodeGui(tk.Tk):
         self.log_text.configure(yscrollcommand=scrollbar.set)
 
         for row in self.row_vars:
-            for key in ("node_id", "rssi", "battery", "samples"):
+            for key in ("node_id", "data1", "data2", "data3", "data4"):
                 row[key].trace_add("write", self._on_input_changed)
 
         for variable in (
@@ -185,9 +189,10 @@ class UdpNodeGui(tk.Tk):
         for row in self.row_vars:
             row["preview"].set(",".join((
                 row["node_id"].get().strip(),
-                row["rssi"].get().strip(),
-                row["battery"].get().strip(),
-                row["samples"].get().strip(),
+                row["data1"].get().strip(),
+                row["data2"].get().strip(),
+                row["data3"].get().strip(),
+                row["data4"].get().strip(),
             )))
 
     def _validate_common_inputs(self) -> tuple[str, int, float, int]:
@@ -221,29 +226,24 @@ class UdpNodeGui(tk.Tk):
 
         return host, port, interval, count
 
-    def _validate_row(self, row_index: int) -> tuple[str, int, float, int]:
+    def _validate_row(self, row_index: int) -> tuple[str, str, str, str, str]:
         row = self.row_vars[row_index]
 
-        node_id = row["node_id"].get().strip()
-        if not node_id:
-            raise ValueError(f"Row {row_index + 1}: Node ID is required")
+        values = (
+            row["node_id"].get().strip(),
+            row["data1"].get().strip(),
+            row["data2"].get().strip(),
+            row["data3"].get().strip(),
+            row["data4"].get().strip(),
+        )
 
-        try:
-            rssi = int(row["rssi"].get().strip())
-        except ValueError as exc:
-            raise ValueError(f"Row {row_index + 1}: RSSI must be an integer") from exc
+        for idx, value in enumerate(values, start=1):
+            if not value:
+                raise ValueError(f"Row {row_index + 1}: Field {idx} is required")
+            if len(value) > FIELD_MAX_LEN:
+                raise ValueError(f"Row {row_index + 1}: Field {idx} exceeds {FIELD_MAX_LEN} chars")
 
-        try:
-            battery = float(row["battery"].get().strip())
-        except ValueError as exc:
-            raise ValueError(f"Row {row_index + 1}: Battery must be a number") from exc
-
-        try:
-            samples = int(row["samples"].get().strip())
-        except ValueError as exc:
-            raise ValueError(f"Row {row_index + 1}: Samples must be an integer") from exc
-
-        return node_id, rssi, battery, samples
+        return values
 
     def _active_row_indexes(self) -> list[int]:
         indexes = [index for index, row in enumerate(self.row_vars) if row["enabled"].get()]
@@ -251,8 +251,8 @@ class UdpNodeGui(tk.Tk):
             raise ValueError("Enable at least one row to send")
         return indexes
 
-    def _build_payload(self, node_id: str, rssi: int, battery: float, samples: int) -> str:
-        return f"{node_id},{rssi},{battery:.2f},{samples}"
+    def _build_payload(self, device: str, data1: str, data2: str, data3: str, data4: str) -> str:
+        return f"{device},{data1},{data2},{data3},{data4}"
 
     def _send_packet(self, host: str, port: int, payload: str) -> None:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
@@ -261,8 +261,8 @@ class UdpNodeGui(tk.Tk):
     def send_row(self, row_index: int) -> None:
         try:
             host, port, _interval, _count = self._validate_common_inputs()
-            node_id, rssi, battery, samples = self._validate_row(row_index)
-            payload = self._build_payload(node_id, rssi, battery, samples)
+            device, data1, data2, data3, data4 = self._validate_row(row_index)
+            payload = self._build_payload(device, data1, data2, data3, data4)
             self._send_packet(host, port, payload)
         except OSError as exc:
             messagebox.showerror("Send failed", str(exc))
@@ -272,8 +272,6 @@ class UdpNodeGui(tk.Tk):
             return
 
         self._log(f"Sent row {row_index + 1} -> {host}:{port} | {payload}")
-        if self.auto_increment.get():
-            self._increment_row_samples(row_index)
 
     def send_once(self) -> None:
         try:
@@ -281,8 +279,8 @@ class UdpNodeGui(tk.Tk):
             row_indexes = self._active_row_indexes()
             payloads: list[tuple[int, str]] = []
             for row_index in row_indexes:
-                node_id, rssi, battery, samples = self._validate_row(row_index)
-                payload = self._build_payload(node_id, rssi, battery, samples)
+                device, data1, data2, data3, data4 = self._validate_row(row_index)
+                payload = self._build_payload(device, data1, data2, data3, data4)
                 self._send_packet(host, port, payload)
                 payloads.append((row_index, payload))
         except OSError as exc:
@@ -294,8 +292,6 @@ class UdpNodeGui(tk.Tk):
 
         for row_index, payload in payloads:
             self._log(f"Sent row {row_index + 1} -> {host}:{port} | {payload}")
-            if self.auto_increment.get():
-                self._increment_row_samples(row_index)
 
     def start_loop(self) -> None:
         if self.sender_thread and self.sender_thread.is_alive():
@@ -306,8 +302,8 @@ class UdpNodeGui(tk.Tk):
             row_indexes = self._active_row_indexes()
             row_data = []
             for row_index in row_indexes:
-                node_id, rssi, battery, samples = self._validate_row(row_index)
-                row_data.append((row_index, node_id, rssi, battery, samples))
+                device, data1, data2, data3, data4 = self._validate_row(row_index)
+                row_data.append((row_index, device, data1, data2, data3, data4))
         except ValueError as exc:
             messagebox.showerror("Invalid input", str(exc))
             return
@@ -334,7 +330,7 @@ class UdpNodeGui(tk.Tk):
         self,
         host: str,
         port: int,
-        row_data: list[tuple[int, str, int, float, int]],
+        row_data: list[tuple[int, str, str, str, str, str]],
         interval: float,
         count: int,
     ) -> None:
@@ -347,16 +343,11 @@ class UdpNodeGui(tk.Tk):
                     if self.stop_event.is_set() or (count != 0 and sent >= count):
                         break
 
-                    row_index, node_id, rssi, battery, samples = row_state
-                    payload = self._build_payload(node_id, rssi, battery, samples)
+                    row_index, device, data1, data2, data3, data4 = row_state
+                    payload = self._build_payload(device, data1, data2, data3, data4)
                     self._send_packet(host, port, payload)
                     sent += 1
                     self.log_queue.put(f"Sent row {row_index + 1} -> {host}:{port} | {payload}")
-
-                    if self.auto_increment.get():
-                        row_state[4] = samples + 1
-                        self.log_queue.put(f"Row {row_index + 1} samples updated -> {row_state[4]}")
-                        self.after(0, lambda idx=row_index, value=row_state[4]: self._set_row_samples(idx, value))
 
                 if interval > 0:
                     if self.stop_event.wait(interval):
@@ -373,14 +364,6 @@ class UdpNodeGui(tk.Tk):
         self.stop_loop_button.configure(state="normal" if running else "disabled")
         for button in self.row_send_buttons:
             button.configure(state="disabled" if running else "normal")
-
-    def _increment_row_samples(self, row_index: int) -> None:
-        row = self.row_vars[row_index]
-        next_samples = int(row["samples"].get().strip()) + 1
-        self._set_row_samples(row_index, next_samples)
-
-    def _set_row_samples(self, row_index: int, value: int) -> None:
-        self.row_vars[row_index]["samples"].set(str(value))
 
     def _log(self, message: str) -> None:
         self.log_text.configure(state="normal")

@@ -33,6 +33,21 @@ static void unlock_data(void)
     }
 }
 
+static void copy_field(char *dst, size_t dst_size, const char *src)
+{
+    if (!dst || dst_size == 0) {
+        return;
+    }
+
+    if (!src) {
+        dst[0] = '\0';
+        return;
+    }
+
+    strncpy(dst, src, dst_size - 1);
+    dst[dst_size - 1] = '\0';
+}
+
 void wireless_data_init(void)
 {
     if (s_lock == NULL) {
@@ -44,10 +59,11 @@ void wireless_data_init(void)
     s_live_started = false;
     s_count = 12;
     for (uint32_t i = 0; i < s_count; i++) {
-        snprintf(s_devices[i].node_id, sizeof(s_devices[i].node_id), "ESP32-%02lu", (unsigned long)(i + 1));
-        s_devices[i].rssi_dbm = -30 - (int)(i * 3);
-        s_devices[i].battery_v = 4.20f - (0.05f * (float)i);
-        s_devices[i].samples = 100 + (i * 17);
+        snprintf(s_devices[i].device_name, sizeof(s_devices[i].device_name), "NODE-%02lu", (unsigned long)(i + 1));
+        snprintf(s_devices[i].data1, sizeof(s_devices[i].data1), "STATE%lu", (unsigned long)((i % 5) + 1));
+        snprintf(s_devices[i].data2, sizeof(s_devices[i].data2), "TEMP%02lu", (unsigned long)(20 + i));
+        snprintf(s_devices[i].data3, sizeof(s_devices[i].data3), "BATT%02lu", (unsigned long)(90 - (i % 10)));
+        snprintf(s_devices[i].data4, sizeof(s_devices[i].data4), "CNT%04lu", (unsigned long)(100 + i));
         s_devices[i].last_seen_s = 0;
     }
     unlock_data();
@@ -64,22 +80,10 @@ void wireless_data_mock_tick(void)
     s_uptime_s++;
 
     for (uint32_t i = 0; i < s_count; i++) {
-        int drift = (int)((s_uptime_s + i) % 5) - 2;
-        int next_rssi = s_devices[i].rssi_dbm + drift;
-        if (next_rssi < -95) {
-            next_rssi = -95;
-        }
-        if (next_rssi > -25) {
-            next_rssi = -25;
-        }
-
-        s_devices[i].rssi_dbm = next_rssi;
-        s_devices[i].battery_v -= 0.0005f;
-        if (s_devices[i].battery_v < 3.20f) {
-            s_devices[i].battery_v = 4.20f;
-        }
-
-        s_devices[i].samples += 1 + (i % 3);
+        snprintf(s_devices[i].data1, sizeof(s_devices[i].data1), "STATE%lu", (unsigned long)(((s_uptime_s + i) % 5) + 1));
+        snprintf(s_devices[i].data2, sizeof(s_devices[i].data2), "TEMP%02lu", (unsigned long)(20 + ((s_uptime_s + i) % 30)));
+        snprintf(s_devices[i].data3, sizeof(s_devices[i].data3), "BATT%02lu", (unsigned long)(70 + ((s_uptime_s + i) % 30)));
+        snprintf(s_devices[i].data4, sizeof(s_devices[i].data4), "CNT%04lu", (unsigned long)(s_uptime_s + i));
         s_devices[i].last_seen_s = s_uptime_s;
     }
     unlock_data();
@@ -125,9 +129,13 @@ bool wireless_data_mock_enabled(void)
     return enabled;
 }
 
-bool wireless_data_upsert(const char *node_id, int rssi_dbm, float battery_v, uint32_t samples)
+bool wireless_data_upsert(const char *device_name,
+                         const char *data1,
+                         const char *data2,
+                         const char *data3,
+                         const char *data4)
 {
-    if (!node_id || node_id[0] == '\0') {
+    if (!device_name || device_name[0] == '\0') {
         return false;
     }
 
@@ -141,10 +149,11 @@ bool wireless_data_upsert(const char *node_id, int rssi_dbm, float battery_v, ui
     }
 
     for (uint32_t i = 0; i < s_count; i++) {
-        if (strncmp(s_devices[i].node_id, node_id, sizeof(s_devices[i].node_id)) == 0) {
-            s_devices[i].rssi_dbm = rssi_dbm;
-            s_devices[i].battery_v = battery_v;
-            s_devices[i].samples = samples;
+        if (strncmp(s_devices[i].device_name, device_name, sizeof(s_devices[i].device_name)) == 0) {
+            copy_field(s_devices[i].data1, sizeof(s_devices[i].data1), data1);
+            copy_field(s_devices[i].data2, sizeof(s_devices[i].data2), data2);
+            copy_field(s_devices[i].data3, sizeof(s_devices[i].data3), data3);
+            copy_field(s_devices[i].data4, sizeof(s_devices[i].data4), data4);
             s_devices[i].last_seen_s = now_s();
             unlock_data();
             return true;
@@ -156,11 +165,11 @@ bool wireless_data_upsert(const char *node_id, int rssi_dbm, float battery_v, ui
         return false;
     }
 
-    strncpy(s_devices[s_count].node_id, node_id, sizeof(s_devices[s_count].node_id) - 1);
-    s_devices[s_count].node_id[sizeof(s_devices[s_count].node_id) - 1] = '\0';
-    s_devices[s_count].rssi_dbm = rssi_dbm;
-    s_devices[s_count].battery_v = battery_v;
-    s_devices[s_count].samples = samples;
+    copy_field(s_devices[s_count].device_name, sizeof(s_devices[s_count].device_name), device_name);
+    copy_field(s_devices[s_count].data1, sizeof(s_devices[s_count].data1), data1);
+    copy_field(s_devices[s_count].data2, sizeof(s_devices[s_count].data2), data2);
+    copy_field(s_devices[s_count].data3, sizeof(s_devices[s_count].data3), data3);
+    copy_field(s_devices[s_count].data4, sizeof(s_devices[s_count].data4), data4);
     s_devices[s_count].last_seen_s = now_s();
     s_count++;
 

@@ -1,7 +1,7 @@
 {
     "version":            "1.2",
     "project_name":       "esp_idf_datalogger_hmi",
-    "project_version":    "bdbf4d1-dirty",
+    "project_version":    "dff6535-dirty",
     "project_path":       "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI",
     "idf_path":           "C:/esp/v5.5.2/esp-idf",
     "build_dir":          "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/build",

@@ -11,7 +11,7 @@
 #include "lvgl.h"
 #include "wireless_data.h"
 
-#define HMI_ROWS_PER_PAGE 8
+#define HMI_ROWS_PER_PAGE 5
 #define HMI_REFRESH_MS    1000
 #define HMI_W             800
 #define HMI_H             480
@@ -55,28 +55,20 @@ static void draw_page(void)
         s_hmi.page = total_pages - 1;
     }
 
-    table_set_if_changed(s_hmi.table, 0, 0, "Node");
-    table_set_if_changed(s_hmi.table, 0, 1, "RSSI");
-    table_set_if_changed(s_hmi.table, 0, 2, "Battery");
-    table_set_if_changed(s_hmi.table, 0, 3, "Samples");
-    table_set_if_changed(s_hmi.table, 0, 4, "Seen(s)");
+    table_set_if_changed(s_hmi.table, 0, 0, "Device");
+    table_set_if_changed(s_hmi.table, 0, 1, "Data1");
+    table_set_if_changed(s_hmi.table, 0, 2, "Data2");
+    table_set_if_changed(s_hmi.table, 0, 3, "Data3");
+    table_set_if_changed(s_hmi.table, 0, 4, "Data4");
 
     for (uint32_t row = 1; row <= HMI_ROWS_PER_PAGE; row++) {
         uint32_t index = (s_hmi.page * HMI_ROWS_PER_PAGE) + (row - 1);
         if (wireless_data_get_by_index(index, &node)) {
-            table_set_if_changed(s_hmi.table, row, 0, node.node_id);
-
-            snprintf(text, sizeof(text), "%d dBm", node.rssi_dbm);
-            table_set_if_changed(s_hmi.table, row, 1, text);
-
-            snprintf(text, sizeof(text), "%.2f V", node.battery_v);
-            table_set_if_changed(s_hmi.table, row, 2, text);
-
-            snprintf(text, sizeof(text), "%lu", (unsigned long)node.samples);
-            table_set_if_changed(s_hmi.table, row, 3, text);
-
-            snprintf(text, sizeof(text), "%lu", (unsigned long)node.last_seen_s);
-            table_set_if_changed(s_hmi.table, row, 4, text);
+            table_set_if_changed(s_hmi.table, row, 0, node.device_name);
+            table_set_if_changed(s_hmi.table, row, 1, node.data1);
+            table_set_if_changed(s_hmi.table, row, 2, node.data2);
+            table_set_if_changed(s_hmi.table, row, 3, node.data3);
+            table_set_if_changed(s_hmi.table, row, 4, node.data4);
         } else {
             table_set_if_changed(s_hmi.table, row, 0, "");
             table_set_if_changed(s_hmi.table, row, 1, "");
@@ -136,9 +128,9 @@ static void hmi_task(void *arg)
     lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
 
     lv_obj_t *title = lv_label_create(scr);
-    lv_label_set_text(title, "Wireless Node Data");
+    lv_label_set_text(title, "Wireless Generic Data");
     lv_obj_set_style_text_color(title, lv_color_hex(0xE0FBFC), 0);
-    lv_obj_set_style_text_font(title, LV_FONT_DEFAULT, 0);
+    lv_obj_set_style_text_font(title, &lv_font_montserrat_28, 0);
     lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 10);
 
     s_hmi.table = lv_table_create(scr);
@@ -146,24 +138,27 @@ static void hmi_task(void *arg)
     lv_obj_align(s_hmi.table, LV_ALIGN_TOP_MID, 0, 48);
     lv_obj_set_style_bg_color(s_hmi.table, lv_color_hex(0x1C2541), 0);
     lv_obj_set_style_text_color(s_hmi.table, lv_color_hex(0xE0FBFC), 0);
-    // Keep table rows compact so all 8 data rows are visible on the 480px panel.
-    lv_obj_set_style_pad_top(s_hmi.table, 2, LV_PART_ITEMS);
-    lv_obj_set_style_pad_bottom(s_hmi.table, 2, LV_PART_ITEMS);
+    // Use a larger font for readability with generic string payload fields.
+    lv_obj_set_style_text_font(s_hmi.table, &lv_font_montserrat_28, LV_PART_ITEMS);
+    lv_obj_set_style_text_font(s_hmi.table, &lv_font_montserrat_28, LV_PART_MAIN);
+    lv_obj_set_style_pad_top(s_hmi.table, 1, LV_PART_ITEMS);
+    lv_obj_set_style_pad_bottom(s_hmi.table, 1, LV_PART_ITEMS);
     lv_obj_set_style_pad_left(s_hmi.table, 4, LV_PART_ITEMS);
     lv_obj_set_style_pad_right(s_hmi.table, 4, LV_PART_ITEMS);
-    lv_obj_set_style_pad_top(s_hmi.table, 4, LV_PART_MAIN);
-    lv_obj_set_style_pad_bottom(s_hmi.table, 4, LV_PART_MAIN);
+    lv_obj_set_style_pad_top(s_hmi.table, 2, LV_PART_MAIN);
+    lv_obj_set_style_pad_bottom(s_hmi.table, 2, LV_PART_MAIN);
     lv_table_set_column_count(s_hmi.table, 5);
     lv_table_set_row_count(s_hmi.table, HMI_ROWS_PER_PAGE + 1);
 
-    lv_table_set_column_width(s_hmi.table, 0, 170);
-    lv_table_set_column_width(s_hmi.table, 1, 130);
-    lv_table_set_column_width(s_hmi.table, 2, 140);
-    lv_table_set_column_width(s_hmi.table, 3, 150);
-    lv_table_set_column_width(s_hmi.table, 4, 150);
+    lv_table_set_column_width(s_hmi.table, 0, 160);
+    lv_table_set_column_width(s_hmi.table, 1, 152);
+    lv_table_set_column_width(s_hmi.table, 2, 152);
+    lv_table_set_column_width(s_hmi.table, 3, 152);
+    lv_table_set_column_width(s_hmi.table, 4, 152);
 
     s_hmi.page_label = lv_label_create(scr);
     lv_obj_set_style_text_color(s_hmi.page_label, lv_color_hex(0xE0FBFC), 0);
+    lv_obj_set_style_text_font(s_hmi.page_label, &lv_font_montserrat_28, 0);
     lv_obj_align(s_hmi.page_label, LV_ALIGN_BOTTOM_MID, 0, -10);
 
     s_hmi.btn_prev = lv_button_create(scr);
@@ -172,6 +167,7 @@ static void hmi_task(void *arg)
     lv_obj_add_event_cb(s_hmi.btn_prev, on_prev_clicked, LV_EVENT_CLICKED, NULL);
     lv_obj_t *prev_label = lv_label_create(s_hmi.btn_prev);
     lv_label_set_text(prev_label, "Prev");
+    lv_obj_set_style_text_font(prev_label, &lv_font_montserrat_28, 0);
     lv_obj_center(prev_label);
 
     s_hmi.btn_next = lv_button_create(scr);
@@ -180,6 +176,7 @@ static void hmi_task(void *arg)
     lv_obj_add_event_cb(s_hmi.btn_next, on_next_clicked, LV_EVENT_CLICKED, NULL);
     lv_obj_t *next_label = lv_label_create(s_hmi.btn_next);
     lv_label_set_text(next_label, "Next");
+    lv_obj_set_style_text_font(next_label, &lv_font_montserrat_28, 0);
     lv_obj_center(next_label);
 
     wireless_data_init();
