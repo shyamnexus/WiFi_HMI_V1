@@ -4,13 +4,20 @@ idf_component_register(
         "cli_parser.c"
         "hmi_screen.c"
         "wireless_data.c"
+        "wifi_manager.c"
+        "node_manager.c"
+        "node_ingest.c"
     INCLUDE_DIRS
         "."
     REQUIRES
         console
         nvs_flash
         esp_timer
+        esp_wifi
+        esp_netif
+        lwip
         bsp
         esp_lvgl_port
         lvgl
 )
+

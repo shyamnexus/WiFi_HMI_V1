@@ -1,7 +1,7 @@
 {
     "version":            "1.2",
     "project_name":       "esp_idf_datalogger_hmi",
-    "project_version":    "1",
+    "project_version":    "bdbf4d1-dirty",
     "project_path":       "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI",
     "idf_path":           "C:/esp/v5.5.2/esp-idf",
     "build_dir":          "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/build",
@@ -1295,12 +1295,12 @@
             "dir": "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/main",
             "type": "LIBRARY",
             "lib": "__idf_main",
-            "reqs": [ "console", "nvs_flash", "esp_timer", "bsp", "espressif__esp_lvgl_port", "lvgl__lvgl" ],
+            "reqs": [ "console", "nvs_flash", "esp_timer", "esp_wifi", "esp_netif", "lwip", "bsp", "espressif__esp_lvgl_port", "lvgl__lvgl" ],
             "priv_reqs": [ "espressif__esp_lcd_touch_gt911", "espressif__esp_lvgl_port", "lvgl__lvgl" ],
             "managed_reqs": [],
             "managed_priv_reqs": [ "espressif__esp_lcd_touch_gt911", "espressif__esp_lvgl_port", "lvgl__lvgl" ],
             "file": "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/build/esp-idf/main/libmain.a",
-            "sources": [ "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/main/main.c", "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/main/cli_parser.c", "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/main/hmi_screen.c", "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/main/wireless_data.c" ],
+            "sources": [ "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/main/main.c", "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/main/cli_parser.c", "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/main/hmi_screen.c", "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/main/wireless_data.c", "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/main/wifi_manager.c", "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/main/node_manager.c", "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/main/node_ingest.c" ],
             "include_dirs": [ "." ]
         },
         "mbedtls": {
@@ -2997,7 +2997,7 @@
             "prefix": "idf",
             "dir": "C:/Work/Project/ESP_HMIV1/ESP_HMI_Main/ESP_IDF_DataLoggerHMI/main",
             "lib": "__idf_main",
-            "reqs": [ "console", "nvs_flash", "esp_timer", "bsp", "espressif__esp_lvgl_port", "lvgl__lvgl" ],
+            "reqs": [ "console", "nvs_flash", "esp_timer", "esp_wifi", "esp_netif", "lwip", "bsp", "espressif__esp_lvgl_port", "lvgl__lvgl" ],
             "priv_reqs": [ "espressif__esp_lcd_touch_gt911", "espressif__esp_lvgl_port", "lvgl__lvgl" ],
             "managed_reqs": [],
             "managed_priv_reqs": [ "espressif__esp_lcd_touch_gt911", "espressif__esp_lvgl_port", "lvgl__lvgl" ],

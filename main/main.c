@@ -2,6 +2,8 @@
 
 #include "cli_parser.h"
 #include "hmi_screen.h"
+#include "wifi_manager.h"
+#include "node_manager.h"
 #include "esp_console.h"
 #include "esp_err.h"
 #include "esp_log.h"
@@ -46,6 +48,10 @@ void app_main(void)
     // REPL constructor initializes esp_console internally.
     ESP_ERROR_CHECK(esp_console_register_help_command());
     ESP_ERROR_CHECK(cli_parser_register_commands());
+
+    /* Initialize WiFi and node managers */
+    ESP_ERROR_CHECK(wifi_manager_init());
+    ESP_ERROR_CHECK(node_manager_init());
 
     if (!hmi_screen_start()) {
         ESP_LOGW(TAG, "HMI screen did not start");

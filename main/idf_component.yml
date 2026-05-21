@@ -13,3 +13,4 @@ dependencies:
   ## GT911 capacitive touch controller driver
   espressif/esp_lcd_touch_gt911:
     version: ">=1.2.0"
+

@@ -1,0 +1,5 @@
+# One packet per line to send over UDP to ESP32 HMI (port 7001)
+# Format: NODE_ID,RSSI_DBM,BATTERY_V,SAMPLES
+NODE-01,-63,3.97,1001
+NODE-02,-71,3.84,1205
+NODE-03,-55,4.08,2302

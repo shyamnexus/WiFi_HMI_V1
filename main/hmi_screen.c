@@ -146,6 +146,13 @@ static void hmi_task(void *arg)
     lv_obj_align(s_hmi.table, LV_ALIGN_TOP_MID, 0, 48);
     lv_obj_set_style_bg_color(s_hmi.table, lv_color_hex(0x1C2541), 0);
     lv_obj_set_style_text_color(s_hmi.table, lv_color_hex(0xE0FBFC), 0);
+    // Keep table rows compact so all 8 data rows are visible on the 480px panel.
+    lv_obj_set_style_pad_top(s_hmi.table, 2, LV_PART_ITEMS);
+    lv_obj_set_style_pad_bottom(s_hmi.table, 2, LV_PART_ITEMS);
+    lv_obj_set_style_pad_left(s_hmi.table, 4, LV_PART_ITEMS);
+    lv_obj_set_style_pad_right(s_hmi.table, 4, LV_PART_ITEMS);
+    lv_obj_set_style_pad_top(s_hmi.table, 4, LV_PART_MAIN);
+    lv_obj_set_style_pad_bottom(s_hmi.table, 4, LV_PART_MAIN);
     lv_table_set_column_count(s_hmi.table, 5);
     lv_table_set_row_count(s_hmi.table, HMI_ROWS_PER_PAGE + 1);
 
@@ -182,7 +189,9 @@ static void hmi_task(void *arg)
 
     while (true) {
         vTaskDelay(pdMS_TO_TICKS(HMI_REFRESH_MS));
-        wireless_data_mock_tick();
+        if (wireless_data_mock_enabled()) {
+            wireless_data_mock_tick();
+        }
         if (lvgl_port_lock(0)) {
             draw_page();
             lvgl_port_unlock();
@@ -249,3 +258,4 @@ bool hmi_screen_start(void)
     ESP_LOGI(TAG, "HMI screen started");
     return true;
 }
+
