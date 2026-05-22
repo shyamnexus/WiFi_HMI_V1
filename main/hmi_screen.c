@@ -11,7 +11,7 @@
 #include "lvgl.h"
 #include "wireless_data.h"
 
-#define HMI_ROWS_PER_PAGE 5
+#define HMI_ROWS_PER_PAGE 7
 #define HMI_REFRESH_MS    1000
 #define HMI_W             800
 #define HMI_H             480
